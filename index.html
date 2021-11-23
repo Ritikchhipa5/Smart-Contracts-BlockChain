@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+  <!-- Head Section Start Here -->
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="node_modules/web3/dist/web3.min.js"></script>
+    <title>Smart Contact</title>
+  </head>
+
+  <!-- Body Tag Start here -->
+  <body>
+    <h3>Web 3 Demo</h3>
+    <br />
+    <button onclick="printNumber()">Print Number</button>
+    <button onclick="changeNumber();">Change Number</button>
+    <br />
+    Status : <span id="status">Loading....</span>
+  </body>
+  <!-- Body Tag End Here -->
+
+  <!-- Script Section -->
+
+  <script type="text/javascript">
+    //Get the Print Number
+    async function printNumber() {
+      updateStatus("Fetch Number...");
+      const number = await window.contract.methods.number().call();
+      updateStatus(`Number is : ${number}`);
+    }
+
+    //Set the Number
+    async function changeNumber() {
+      const value = Math.floor(Math.random() * 100);
+      const account = await AccountDetails();
+      updateStatus(`Updating ${value} Number please wait`);
+      const number = await window.contract.methods
+        .setNumber(value)
+        .send({ from: account });
+
+      updateStatus("Updated");
+    }
+
+    //Get Account Details
+    async function AccountDetails() {
+      const account = await window.web3.eth.getAccounts();
+      return account[0];
+    }
+
+    //Check the Update Status
+    function updateStatus(status) {
+      const stausE1 = document.getElementById("status");
+      stausE1.innerHTML = status;
+      console.log(status);
+    }
+
+    //Load Web3 Function
+    async function loadWeb3() {
+      if (window.ethereum) {
+        window.web3 = new Web3(window.ethereum);
+        window.ethereum.enable();
+      }
+    }
+
+    //Load the Contract
+    async function loadContract() {
+      return await new window.web3.eth.Contract(
+        [
+          {
+            inputs: [],
+            name: "number",
+            outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+            stateMutability: "view",
+            type: "function",
+          },
+          {
+            inputs: [
+              { internalType: "uint256", name: "_number", type: "uint256" },
+            ],
+            name: "setNumber",
+            outputs: [],
+            stateMutability: "nonpayable",
+            type: "function",
+          },
+        ],
+        "0x75df63446c891309bcc36c5a6803b8bce7237bd8"
+      );
+    }
+
+    //Load Function
+    async function load() {
+      await loadWeb3();
+      window.contract = await loadContract();
+      console.log(window.contract);
+      updateStatus("Ready");
+    }
+
+    // Call the Load function
+    load();
+  </script>
+</html>
